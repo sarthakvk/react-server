@@ -1,0 +1,7 @@
+venv/
+.idea/
+*.log
+*.pot
+*.py[cod]
+__pycache__
+media
