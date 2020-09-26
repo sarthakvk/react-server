@@ -1,30 +1,12 @@
 from django.db import models
 from users.models import User
 from channels.models import Channel
-from datetime import datetime
+from django_extensions.db.models import TimeStampedModel
 
 # Create your models here.
 
 
-class UpdateTiming(models.Model):
-    """
-    class for controlling the timing for object
-    creating and update
-    """
-
-    created_at = models.DateTimeField(null=False, blank=False)
-    updated_at = models.DateTimeField(null=False, blank=False)
-
-    def save(self, *args, **kwargs):
-        if self.created_at is None:
-            self.created_at = datetime.now()
-            self.updated_at = self.created_at
-        else:
-            self.updated_at = datetime.now()
-        super().save(*args, **kwargs)
-
-
-class Likes(UpdateTiming):
+class Likes(TimeStampedModel):
     """
     Like model for storing likes and dislikes
     this has many2many relation with `Media` model
@@ -35,7 +17,7 @@ class Likes(UpdateTiming):
     val = models.BooleanField(null=False, blank=False)
 
 
-class Comments(UpdateTiming):
+class Comments(TimeStampedModel):
     """
     Comments model for storing likes and dislikes
     this has many2many relation with `Media` model
@@ -48,13 +30,13 @@ class Comments(UpdateTiming):
     reply = models.ManyToManyField("self", blank=True, related_name="parent")
 
 
-class Media(UpdateTiming):
+class Media(TimeStampedModel):
     """
     Base Model for all media i.e videos, audio and other
     """
 
     title = models.CharField(max_length=100, blank=False, null=False)
-    Description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
     thumbnail = models.ImageField(
         upload_to="multimedia/thumbnail", null=True, blank=True
     )

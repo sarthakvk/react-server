@@ -3,11 +3,14 @@ from rest_framework.views import APIView
 from django.http import JsonResponse
 from .serializers import SignupSerializer
 from rest_framework.authtoken.models import Token
+from rest_framework.permissions import AllowAny
 
 # Create your views here.
 
 
 class SignUp(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = SignupSerializer(data=request.data)
         data = {}

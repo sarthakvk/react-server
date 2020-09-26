@@ -1,10 +1,12 @@
 from django.db import models
+from django.apps import apps
 from users.models import User
+from django_extensions.db.models import TimeStampedModel
 
 # Create your models here.
 
 
-class Channel(models.Model):
+class Channel(TimeStampedModel):
     """
     model for managing channels
     """
