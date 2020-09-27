@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+from django_extensions.db.models import TimeStampedModel
 
 # Create your models here.
 
@@ -23,7 +24,7 @@ class User(AbstractUser):
 
     # Deleting some fields from default AbstractUser model
     email = models.EmailField(unique=True, blank=False, null=False)
-    username = models.CharField(unique=True, max_length=30, null=False, blank=False)
+    username = models.CharField(unique=True, max_length=128, null=False, blank=False)
     password = models.CharField(max_length=128, null=False, blank=False)
     saved = models.ManyToManyField("multimedia.Media", related_name="saved_by")
     objects = CustomUserManager()
