@@ -23,7 +23,9 @@ class GetLatestVideo(APIView):
         serializer = GetLatestVideoSerializer(data=request.data)
         if serializer.is_valid():
             count = serializer.validated_data.get("count")
-            videos = Video.objects.all().order_by("-created")[:count]  # Todo cache this query
+            videos = Video.objects.all().order_by("-created")[
+                :count
+            ]  # Todo cache this query
             response_data["videos"] = videos
             response_format = {
                 "videos": [
@@ -48,10 +50,9 @@ class GetVideos(APIView):
         serializer = GetVideosSerializer(data=request.data)
         if serializer.is_valid():
             start = (serializer.validated_data["page"] - 1) * 3
-            channels = (
-                Channel.objects.all()
-                .order_by("name")[start : start + 3]
-            ) # Todo cache this query
+            channels = Channel.objects.all().order_by("name")[
+                start : start + 3
+            ]  # Todo cache this query
             response_data["channels"] = channels
             response_maxlen["videos"] = 10
             response_format = {
