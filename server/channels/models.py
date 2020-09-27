@@ -18,3 +18,8 @@ class Channel(TimeStampedModel):
     subscribers = models.ManyToManyField(
         User, blank=True, related_name="channel_subscribed"
     )
+
+    @property
+    def videos(self):
+        lazy_model = apps.get_model('multimedia', 'Video')
+        return lazy_model.objects.filter(media_ptr__type='video')
