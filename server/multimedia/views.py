@@ -22,7 +22,7 @@ class GetLatestVideo(CacheMixin ,APIView):
 
     def get(self, request):
         response_data = {}
-        serializer = GetLatestVideoSerializer(data=request.data)
+        serializer = GetLatestVideoSerializer(data=request.GET)
         if serializer.is_valid():
             count = serializer.validated_data.get("count")
             videos = Video.objects.all().order_by("-created")[
@@ -49,7 +49,7 @@ class GetVideos(CacheMixin, APIView):
     def get(self, request):
         response_data = {}
         response_maxlen = {}
-        serializer = GetVideosSerializer(data=request.data)
+        serializer = GetVideosSerializer(data=request.GET)
         if serializer.is_valid():
             start = (serializer.validated_data["page"] - 1) * 3
             channels = Channel.objects.all().order_by("name")[
