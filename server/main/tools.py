@@ -5,6 +5,7 @@ useful tools for whole project
 from django.http.response import JsonResponse
 from django.db.models import Model
 from django.core.files.base import File
+from django.views.decorators.cache import cache_page
 import datetime
 
 
@@ -87,3 +88,13 @@ def return_response(
                 "success": None,
             }
         )
+
+
+class CacheMixin(object):
+    cache_timeout = 60 * 15
+
+    def get_cache_timeout(self):
+        return self.cache_timeout
+
+    def dispatch(self, *args, **kwargs):
+        return cache_page(self.get_cache_timeout())(super(CacheMixin, self).dispatch)(*args, **kwargs)

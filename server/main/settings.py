@@ -112,6 +112,9 @@ CACHES = {
     }
 }
 
+# Cache time to live is 15 minutes.
+CACHE_TIME = 60 * 15
+
 # rest framework
 
 REST_FRAMEWORK = {
