@@ -35,6 +35,11 @@ class Comments(TimeStampedModel):
     # ManyToManyRel = Media
 
 
+class Tags(TimeStampedModel):
+    name = models.CharField(max_length=100, null=False, blank=True, unique=True)
+    # ManyToManyRel = Media
+
+
 class Media(TimeStampedModel):
     """
     Base Model for all media i.e videos, audio and other
@@ -53,10 +58,11 @@ class Media(TimeStampedModel):
     thumbnail = models.ImageField(
         upload_to="multimedia/thumbnail", null=True, blank=True
     )
+    channel = models.ForeignKey(Channel, on_delete=models.CASCADE, blank=True)
     comments = models.ManyToManyField(Comments, related_name="media")
     likes = models.ManyToManyField(Likes, related_name="media", blank=True)
-    views = models.ManyToManyField(User, related_name="views", blank=True)
-    channel = models.ForeignKey(Channel, on_delete=models.CASCADE, blank=True)
+    views = models.ManyToManyField(User, related_name="media", blank=True)
+    tags = models.ManyToManyField(Tags, related_name="media", blank=True)
 
 
 class Video(Media):

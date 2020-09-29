@@ -105,6 +105,20 @@ def populate_saved(populate=10):
         saved.save()
 
 
+def populate_tags(N=100):
+    global _media
+    try:
+        for i in range(N):
+            Tags.objects.create(name=fake.word())
+    except:
+        pass
+    all_tags = list(Tags.objects.all())
+    media = list(_media)
+    for a in all_tags:
+        a.media.set(sample(media, randint(1, len(media))))
+        a.save()
+
+
 def populate_data(
     default=True,
     users=None,
@@ -114,6 +128,10 @@ def populate_data(
     max_saved=None,
 ):
     if default:
+        print("This will take some time")
+        confirm = input("Proceed (y/N) ")
+        if confirm not in ("y", "Y"):
+            return
         print("Creating Users...")
         populate_users()
         print("Creating Channels...")
@@ -126,6 +144,8 @@ def populate_data(
         populate_likes()
         print("Adding saved videos...")
         populate_saved()
+        print("popolating Tags...")
+        populate_tags()
     else:
         populate_users(populate=users)
         populate_channels(populate=channels)
@@ -133,6 +153,7 @@ def populate_data(
         populate_comments(populate=max_comments)
         populate_likes()
         populate_saved(populate=max_saved)
+        populate_tags()
 
 
 class Command(BaseCommand):
