@@ -16,7 +16,11 @@ from main.tools import return_response, CacheMixin
 # Create your views here.
 
 
-class GetLatestVideo(CacheMixin ,APIView):
+class GetLatestVideosHome(CacheMixin, APIView):
+    """
+    endpoint to get top videos on home page
+    """
+
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
 
@@ -25,9 +29,7 @@ class GetLatestVideo(CacheMixin ,APIView):
         serializer = GetLatestVideoSerializer(data=request.GET)
         if serializer.is_valid():
             count = serializer.validated_data.get("count")
-            videos = Video.objects.all().order_by("-created")[
-                :count
-            ]
+            videos = Video.objects.all().order_by("-created")[:count]
             response_data["videos"] = videos
             response_format = {
                 "videos": [
@@ -42,7 +44,11 @@ class GetLatestVideo(CacheMixin ,APIView):
         return return_response(response_data=response_data, format=response_format)
 
 
-class GetVideos(CacheMixin, APIView):
+class GetChannelVideos(CacheMixin, APIView):
+    """
+    endpoint to get channel wise videos on home page
+    """
+
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
 
@@ -52,11 +58,9 @@ class GetVideos(CacheMixin, APIView):
         serializer = GetVideosSerializer(data=request.GET)
         if serializer.is_valid():
             start = (serializer.validated_data["page"] - 1) * 3
-            channels = Channel.objects.all().order_by("name")[
-                start : start + 3
-            ]
+            channels = Channel.objects.all().order_by("name")[start : start + 3]
             response_data["channels"] = channels
-            response_maxlen["videos"] = 10000
+            response_maxlen["videos"] = 10
             response_format = {
                 "channels": [
                     {

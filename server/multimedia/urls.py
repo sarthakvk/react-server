@@ -1,9 +1,9 @@
 from django.urls import path
-from .views import GetLatestVideo, GetVideos
+from .views import GetLatestVideosHome, GetChannelVideos
 
 app_name = "multimedia"
 
 urlpatterns = [
-    path("latest_videos/", GetLatestVideo.as_view(), name="latest_videos"),
-    path("home_videos/", GetVideos.as_view(), name="home_videos"),
+    path("latest_videos/", GetLatestVideosHome.as_view(), name="latest_videos"),
+    path("home_videos/", GetChannelVideos.as_view(), name="home_videos"),
 ]
