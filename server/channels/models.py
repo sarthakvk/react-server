@@ -22,4 +22,4 @@ class Channel(TimeStampedModel):
     @property
     def videos(self):
         lazy_model = apps.get_model("multimedia", "Video")
-        return lazy_model.objects.filter(media_ptr__type="video")
+        return lazy_model.objects.filter(media_ptr__type="video", channel=self)

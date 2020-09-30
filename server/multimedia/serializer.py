@@ -10,7 +10,32 @@ class GetVideosSerializer(serializers.Serializer):
 
 
 class AllMediaSerializer(serializers.Serializer):
-    type = serializers.CharField(required=True, max_length=10)
+    ORDER = (
+        ("time", "Time"),
+        ("likes", "Likes"),
+        ("comments", "Comments"),
+        ("views", "Views"),
+        ("editor_choice", "Editor Choice"),
+    )
+
+    TYPE = (
+        ("video", "Video"),
+        ("audio", "Audio"),
+        ("picture", "Picture"),
+        ("article", "Article"),
+    )
+    type = serializers.ChoiceField(required=True, choices=TYPE)
     page = serializers.IntegerField(required=True)
-    orderby = serializers.CharField(required=True, max_length=20)
+    orderby = serializers.ChoiceField(required=True, choices=ORDER)
     tags = serializers.ListField(required=False)
+
+
+class MediaPreviewSerializer(serializers.Serializer):
+    TYPE = (
+        ("video", "Video"),
+        ("audio", "Audio"),
+        ("picture", "Picture"),
+        ("article", "Article"),
+    )
+    id = serializers.IntegerField(required=True)
+    type = serializers.ChoiceField(required=True, choices=TYPE)

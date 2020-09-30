@@ -40,6 +40,10 @@ class Tags(TimeStampedModel):
     # ManyToManyRel = Media
 
 
+class Views(TimeStampedModel):
+    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+
+
 class Media(TimeStampedModel):
     """
     Base Model for all media i.e videos, audio and other
@@ -61,7 +65,7 @@ class Media(TimeStampedModel):
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, blank=True)
     comments = models.ManyToManyField(Comments, related_name="media")
     likes = models.ManyToManyField(Likes, related_name="media", blank=True)
-    views = models.ManyToManyField(User, related_name="media", blank=True)
+    views = models.ManyToManyField(Views, related_name="media", blank=True)
     tags = models.ManyToManyField(Tags, related_name="media", blank=True)
 
 

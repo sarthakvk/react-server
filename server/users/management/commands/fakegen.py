@@ -12,7 +12,7 @@ _users = User.objects.all()
 _channels = Channel.objects.all()
 
 
-def populate_users(populate=500):
+def populate_users(populate=50):
     for i in range(populate):
         email = fake.email()
         user = User(
@@ -39,7 +39,7 @@ def populate_channels(populate=50):
         channel.save()
 
 
-def populate_multimedia(populate=500):
+def populate_multimedia(populate=100):
     global _channels
     for i in range(populate):
         channel = choice(_channels)
@@ -105,7 +105,7 @@ def populate_saved(populate=10):
         saved.save()
 
 
-def populate_tags(N=100):
+def populate_tags(N=20):
     global _media
     try:
         for i in range(N):
@@ -117,6 +117,16 @@ def populate_tags(N=100):
     for a in all_tags:
         a.media.set(sample(media, randint(1, len(media))))
         a.save()
+
+
+def populate_views():
+    global _media, _users
+    media = list(_media)
+    for user in _users:
+        view = Views(user=user)
+        view.save()
+        view.media.set(sample(media, randint(1, 50)))
+        view.save()
 
 
 def populate_data(
@@ -146,6 +156,8 @@ def populate_data(
         populate_saved()
         print("popolating Tags...")
         populate_tags()
+        print("populateing views...")
+        populate_views()
     else:
         populate_users(populate=users)
         populate_channels(populate=channels)

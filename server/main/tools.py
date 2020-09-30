@@ -3,9 +3,9 @@ useful tools for whole project
 """
 
 from django.http.response import JsonResponse
-from django.db.models import Model
 from django.core.files.base import File
 from django.views.decorators.cache import cache_page
+from multimedia.models import Video, Audio, Picture, Article
 import datetime
 
 
@@ -100,3 +100,13 @@ class CacheMixin(object):
         return cache_page(self.get_cache_timeout())(super(CacheMixin, self).dispatch)(
             *args, **kwargs
         )
+
+
+def get_media_class(media_type):
+    media_dict = {
+        "video": Video,
+        "article": Article,
+        "picture": Picture,
+        "audio": Audio,
+    }
+    return media_dict.get(media_type)
