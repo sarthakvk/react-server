@@ -62,18 +62,18 @@ class GetChannelVideos(CacheMixin, APIView):
         if serializer.is_valid():
             start = (serializer.validated_data["page"] - 1) * 3
             channels = (
-                Channel.objects.prefetch_related("videos")
+                Channel.objects.prefetch_related("media_set")
                 .all()
                 .order_by("name")[start : start + 3]
             )
             response_data["channels"] = channels
-            response_maxlen["videos"] = 10
+            response_maxlen["media_set"] = 10
             response_format = {
                 "channels": [
                     {
                         "name": 1,
                         "profile_pic": 1,
-                        "videos": [
+                        "media_set": [
                             {
                                 "id": 1,
                                 "title": 1,
