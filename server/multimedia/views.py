@@ -16,6 +16,7 @@ from .models import Video, Audio, Picture, Article, Media, Views
 from channels.models import Channel
 from main.tools import return_response, CacheMixin, get_media_class
 from ipware import get_client_ip
+
 # Create your views here.
 
 
@@ -191,9 +192,11 @@ class MediaPreview(APIView):
                 "comments", "likes", "views"
             ).get(id=media_id)
             response_data[type] = media
-            response_data[
-                "comments"
-            ] = media.comments.all().annotate(replies_count=Count('replies')).order_by('-replies_count')
+            response_data["comments"] = (
+                media.comments.all()
+                .annotate(replies_count=Count("replies"))
+                .order_by("-replies_count")
+            )
             response_data["likes_count"] = media.likes.filter(val=True).count()
             response_data["dislikes_count"] = media.likes.filter(val=False).count()
             response_data["views_count"] = media.views.all().count()
