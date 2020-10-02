@@ -15,7 +15,7 @@ from .serializer import (
 from .models import Video, Audio, Picture, Article, Media, Views
 from channels.models import Channel
 from main.tools import return_response, CacheMixin, get_media_class
-
+from ipware import get_client_ip
 # Create your views here.
 
 
@@ -64,7 +64,8 @@ class GetChannelVideos(CacheMixin, APIView):
             channels = (
                 Channel.objects.prefetch_related("video")
                 .all()
-                .order_by("name")[start : start + 3]
+                .annotate(max=Count("video"))
+                .order_by("-max")[start : start + 3]
             )
             response_data["channels"] = channels
             response_maxlen["video"] = 10
@@ -106,21 +107,32 @@ class AllMedia(CacheMixin, APIView):
         return media_dict[type]
 
     def get_query_prefix(self, orderby):
-        order_dict = {
-            "time": ".prefetch_related('tags')" ".all().order_by('-created')",
-            "likes": ".prefetch_related('tags', 'likes')"
+        TIME = ".prefetch_related('tags').all()" ".order_by('-created')"
+
+        LIKES = (
+            ".prefetch_related('tags', 'likes')"
             ".annotate(total_likes=Count('likes'))"
-            ".order_by('-total_likes')",
-            "comments": "prefetch_related('tags', 'comments')"
+            ".order_by('-total_likes')"
+        )
+
+        COMMENTS = (
+            "prefetch_related('tags', 'comments')"
             ".annotate(total_comments=Count('comments'))"
-            ".order_by('-total_comments')",
-            "views": ".prefetch_related('tags', 'views')"
-            ".annotate(total_views=Count('views'))"
-            ".order_by('-total_views')",
-            "editor_choice": ".select_related('channel')"
+            ".order_by('-total_comments')"
+        )
+
+        EDITOR_CHOICE = (
+            ".select_related('channel')"
             ".prefetch_related('tags', 'channel__subscribers')"
             ".annotate(subs=Count('channel__subscribers'))"
-            ".order_by(-subs)",
+            ".order_by(-subs)"
+        )
+
+        order_dict = {
+            "time": TIME,
+            "likes": LIKES,
+            "comments": COMMENTS,
+            "editor_choice": EDITOR_CHOICE,
         }
         return order_dict[orderby]
 
@@ -151,7 +163,6 @@ class AllMedia(CacheMixin, APIView):
                 "ordered_response": [
                     {
                         "id": 1,
-                        "type": 1,
                         "title": 1,
                         "description": 1,
                         "thumbnail": 1,
@@ -160,7 +171,8 @@ class AllMedia(CacheMixin, APIView):
                 "total_length": 1,
             }
 
-        return return_response(response_data=response_data, format=response_format)
+            return return_response(response_data=response_data, format=response_format)
+        return return_response(status=False)
 
 
 class MediaPreview(APIView):
@@ -178,43 +190,44 @@ class MediaPreview(APIView):
             media = media_class.objects.prefetch_related(
                 "comments", "likes", "views"
             ).get(id=media_id)
-            response_data["media"] = media
+            response_data[type] = media
             response_data[
                 "comments"
-            ] = media.comments.all()  # TODO fix dynamic serializer for comments
+            ] = media.comments.all().annotate(replies_count=Count('replies')).order_by('-replies_count')
             response_data["likes_count"] = media.likes.filter(val=True).count()
             response_data["dislikes_count"] = media.likes.filter(val=False).count()
             response_data["views_count"] = media.views.all().count()
             response_data["liked"] = None
             if request.user.is_anonymous:
-                view = Views.objects.create(user=None)
-                view.media.add(media)
-                view.save()
+                ip, _ = get_client_ip(request)
+                if ip:
+                    view, is_created = Views.objects.get_or_create(user=None, ip=ip)
+                    if is_created:
+                        eval("view.{}.add(media)".format(type))
+                        view.save()
             else:
                 view, is_created = Views.get_or_create(user=request.user)
                 if is_created:
-                    view.add(media)
+                    eval("view.{}.add(media)".format(type))
                     view.save()
                 has_responded = media.likes.filter(user=request.user)
                 if has_responded:
                     response_data["liked"] = has_responded[0].val
 
             response_format = {
-                "media": {
+                type: {
                     "id": 1,
                     "title": 1,
                     "description": 1,
                     "thumbnail": 1,
                     "content": 1,
+                    "body": 1,
                 },
                 "comments": [
                     {
+                        "id": 1,
                         "message": 1,
-                        "replies": [
-                            {
-                                "message": 1,
-                            }
-                        ],
+                        "replies_count": 1,
                     }
                 ],
                 "likes_count": 1,

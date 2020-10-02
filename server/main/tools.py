@@ -7,6 +7,7 @@ from django.core.files.base import File
 from django.views.decorators.cache import cache_page
 from multimedia.models import Video, Audio, Picture, Article
 import datetime
+from django.conf import settings
 
 
 def _evaluate(obj, exp):
@@ -21,12 +22,13 @@ def _evaluate(obj, exp):
             return attr.url  # todo set staticfiles url for deployment
         elif isinstance(attr, datetime.datetime):
             return str(attr)
+        return attr
     elif hasattr(obj, "keys"):
         if exp in obj.keys():
             return obj[exp]
         else:
             return None
-    return attr
+    return None
 
 
 def _serialize(data, _format, _maxlen={}):
@@ -73,7 +75,7 @@ def return_response(
     try:
         return JsonResponse(
             {
-                "status": True,
+                "status": status,
                 "data": response_data,
                 "errors": response_errors,
                 "success": response_success,
@@ -91,7 +93,7 @@ def return_response(
 
 
 class CacheMixin(object):
-    cache_timeout = 60 * 15
+    cache_timeout = settings.CACHE_TIME
 
     def get_cache_timeout(self):
         return self.cache_timeout

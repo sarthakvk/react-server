@@ -42,7 +42,7 @@ class Tags(TimeStampedModel):
 
 class Views(TimeStampedModel):
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
-    ip = models.CharField(max_length=20, null=True, blank=True)
+    ip = models.GenericIPAddressField(null=True, blank=True)
 
 
 class Media(TimeStampedModel):

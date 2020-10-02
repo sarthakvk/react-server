@@ -118,8 +118,8 @@ CACHES = {
     }
 }
 
-# Cache time to live is 15 minutes.
-CACHE_TIME = 60 * 15
+# Cache time to live is 0 second for development.
+CACHE_TIME = 0
 
 # rest framework
 
