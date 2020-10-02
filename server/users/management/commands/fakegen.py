@@ -7,7 +7,6 @@ from random import randint, choice, sample
 
 fake = Faker()
 
-_media = Media.objects.all()
 _users = User.objects.all()
 _channels = Channel.objects.all()
 
@@ -54,7 +53,6 @@ def populate_multimedia(populate=100):
         media_obj = model(
             title=fake.text(max_nb_chars=15),
             description=fake.text(),
-            type=type,
             channel=channel,
             thumbnail=fake.file_path(extension="png"),
             content=ext,
@@ -65,68 +63,103 @@ def populate_multimedia(populate=100):
 
 
 def populate_comments(populate=10):
-    global _media, _users
-    for i in _media:
-        for j in range(randint(0, populate)):
-            user = choice(_users)
-            try:
-                reply_to = choice([choice(Comments.objects.filter(media__id=i)), None])
-            except:
-                reply_to = None
-            comment = Comments.objects.create(
-                user=user,
-                message=fake.text(max_nb_chars=randint(10, 30)),
-                reply_to=reply_to,
-            )
-            comment.media.add(i)
-            comment.save()
+    global _users
+    type = ("video", "audio", "picture", "article")
+    for t in type:
+        model = eval(t.capitalize())
+        _media = model.objects.all()
+        for i in _media:
+            for j in range(randint(0, populate)):
+                user = choice(_users)
+                try:
+                    reply_to = eval(
+                        "choice([choice(Comments.objects.filter({}=i)), None])".format(
+                            t
+                        )
+                    )
+                except:
+                    reply_to = None
+                comment = Comments.objects.create(
+                    user=user,
+                    message=fake.text(max_nb_chars=randint(10, 30)),
+                    reply_to=reply_to,
+                )
+                if reply_to is None:
+                    eval("comment.{}.add(i)".format(t))
+                comment.save()
 
 
 def populate_likes():
-    global _users, _media
-    for user in _users:
-        like = Likes.objects.create(user=user, val=True)
-        like.media.add(*sample(list(_media), randint(0, len(_media))))
-        like.save()
-        dislike = Likes.objects.create(user=user, val=False)
-        dislike.media.add(*_media.difference(like.media.all()))
-        dislike.save()
+    global _users
+    type = ("video", "audio", "picture", "article")
+    for t in type:
+        model = eval(t.capitalize())
+        _media = model.objects.all()
+        for user in _users:
+            like = Likes.objects.create(user=user, val=True)
+            eval(
+                "like.{}.add(*sample(list(_media), randint(0, len(_media))))".format(t)
+            )
+            like.save()
+            dislike = Likes.objects.create(user=user, val=False)
+            eval(
+                "dislike.{model}.add(*_media.difference(like.{model}.all()))".format(
+                    model=t
+                )
+            )
+            dislike.save()
 
 
 def populate_saved(populate=10):
-    global _users, _media
-    for user in _users:
-        if choice([True, False, True]):
-            continue
-        saved = SavedMedia.objects.create(
-            user=user,
-        )
-        saved.media.add(*sample(list(_media), randint(0, populate)))
-        saved.save()
+    global _users
+    type = ("video", "audio", "picture", "article")
+    for t in type:
+        model = eval(t.capitalize())
+        inter = eval("Saved{}".format(t.capitalize()))
+        _media = model.objects.all()
+        for user in _users:
+            if choice([True, False, True]):
+                continue
+            saved = SavedMedia.objects.create(
+                user=user,
+            )
+            eval("saved.{}.add(*sample(list(_media), randint(0, populate)))".format(t))
+            saved.save()
+            bulk = []
+            for m in eval("saved.{}.all()".format(t)):
+                bulk.append(eval("inter({t}=m,saved_to=saved)".format(t=t)))
+            inter.objects.bulk_create(bulk)
 
 
 def populate_tags(N=20):
-    global _media
     try:
         for i in range(N):
             Tags.objects.create(name=fake.word())
     except:
         pass
-    all_tags = list(Tags.objects.all())
-    media = list(_media)
-    for a in all_tags:
-        a.media.set(sample(media, randint(1, len(media))))
-        a.save()
+    type = ("video", "audio", "picture", "article")
+    for t in type:
+        model = eval(t.capitalize())
+        _media = model.objects.all()
+        all_tags = list(Tags.objects.all())
+        media = list(_media)
+        for a in all_tags:
+            eval("a.{}.set(sample(media, randint(1, len(media)-1)))".format(t))
+            a.save()
 
 
 def populate_views():
-    global _media, _users
-    media = list(_media)
-    for user in _users:
-        view = Views(user=user)
-        view.save()
-        view.media.set(sample(media, randint(1, 50)))
-        view.save()
+    global _users
+    type = ("video", "audio", "picture", "article")
+    for t in type:
+        model = eval(t.capitalize())
+        _media = model.objects.all()
+        media = list(_media)
+        for user in _users:
+            view = Views(user=user)
+            view.save()
+            eval("view.{}.set(sample(media, randint(1, len(media))))".format(t))
+            view.save()
 
 
 def populate_data(

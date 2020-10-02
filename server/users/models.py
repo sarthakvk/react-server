@@ -26,7 +26,6 @@ class User(AbstractUser):
     email = models.EmailField(unique=True, blank=False, null=False)
     username = models.CharField(unique=True, max_length=128, null=False, blank=False)
     password = models.CharField(max_length=128, null=False, blank=False)
-    saved = models.ManyToManyField("multimedia.Media", related_name="saved_by")
     objects = CustomUserManager()
 
 

@@ -42,6 +42,7 @@ class Tags(TimeStampedModel):
 
 class Views(TimeStampedModel):
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+    ip = models.CharField(max_length=20, null=True, blank=True)
 
 
 class Media(TimeStampedModel):
@@ -49,24 +50,22 @@ class Media(TimeStampedModel):
     Base Model for all media i.e videos, audio and other
     """
 
-    MEDIA_TYPE = (
-        ("video", "Video"),
-        ("audio", "Audio"),
-        ("picture", "Picture"),
-        ("article", "Article"),
-    )
-
     title = models.CharField(max_length=100, blank=False, null=False)
     description = models.TextField(blank=True, null=True)
-    type = models.CharField(max_length=10, choices=MEDIA_TYPE, null=False, blank=False)
     thumbnail = models.ImageField(
         upload_to="multimedia/thumbnail", null=True, blank=True
     )
-    channel = models.ForeignKey(Channel, on_delete=models.CASCADE, blank=True)
-    comments = models.ManyToManyField(Comments, related_name="media")
-    likes = models.ManyToManyField(Likes, related_name="media", blank=True)
-    views = models.ManyToManyField(Views, related_name="media", blank=True)
-    tags = models.ManyToManyField(Tags, related_name="media", blank=True)
+    channel = models.ForeignKey(
+        Channel, on_delete=models.CASCADE, blank=True, related_name="%(class)s"
+    )
+    comments = models.ManyToManyField(Comments, related_name="%(class)s")
+    likes = models.ManyToManyField(Likes, related_name="%(class)s", blank=True)
+    views = models.ManyToManyField(Views, related_name="%(class)s", blank=True)
+    tags = models.ManyToManyField(Tags, related_name="%(class)s", blank=True)
+    content = models.FileField(upload_to="multimedia", null=False, blank=True)
+
+    class Meta:
+        abstract = True
 
 
 class Video(Media):
@@ -74,7 +73,7 @@ class Video(Media):
     model for Videos
     """
 
-    content = models.FileField(upload_to="multimedia/videos", null=False, blank=False)
+    pass
 
 
 class Audio(Media):
@@ -82,7 +81,7 @@ class Audio(Media):
     model for Audios
     """
 
-    content = models.FileField(upload_to="multimedia/audios", null=False, blank=False)
+    pass
 
 
 class Picture(Media):
@@ -90,7 +89,7 @@ class Picture(Media):
     model fot Pictures
     """
 
-    content = models.FileField(upload_to="multimedia/pictures", null=False, blank=True)
+    pass
 
 
 class Article(Media):
@@ -98,7 +97,6 @@ class Article(Media):
     model for Articles
     """
 
-    content = models.FileField(upload_to="multimedia/article", null=True, blank=True)
     body = models.TextField(null=False, blank=True)
 
 
@@ -108,4 +106,51 @@ class SavedMedia(TimeStampedModel):
     """
 
     user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
-    media = models.ManyToManyField(Media, blank=True, related_name="saved_to")
+    video = models.ManyToManyField(
+        Video, blank=True, related_name="saved_videos", through="SavedVideo"
+    )
+    picture = models.ManyToManyField(
+        Picture, blank=True, related_name="saved_pictures", through="SavedPicture"
+    )
+    article = models.ManyToManyField(
+        Article, blank=True, related_name="saved_articles", through="SavedArticle"
+    )
+    audio = models.ManyToManyField(
+        Audio, blank=True, related_name="saved_audios", through="SavedAudio"
+    )
+
+
+class SavedVideo(TimeStampedModel):
+    """
+    Intermediate models for managing saved videos
+    """
+
+    video = models.ForeignKey(Video, on_delete=models.CASCADE)
+    saved_to = models.ForeignKey(SavedMedia, on_delete=models.CASCADE)
+
+
+class SavedPicture(TimeStampedModel):
+    """
+    Intermediate models for managing saved pictures
+    """
+
+    picture = models.ForeignKey(Picture, on_delete=models.CASCADE)
+    saved_to = models.ForeignKey(SavedMedia, on_delete=models.CASCADE)
+
+
+class SavedAudio(TimeStampedModel):
+    """
+    Intermediate models for managing saved audio
+    """
+
+    audio = models.ForeignKey(Audio, on_delete=models.CASCADE)
+    saved_to = models.ForeignKey(SavedMedia, on_delete=models.CASCADE)
+
+
+class SavedArticle(TimeStampedModel):
+    """
+    Intermediate models for managing saved article
+    """
+
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    saved_to = models.ForeignKey(SavedMedia, models.CASCADE)
