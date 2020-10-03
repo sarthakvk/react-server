@@ -39,3 +39,13 @@ class MediaPreviewSerializer(serializers.Serializer):
     )
     id = serializers.IntegerField(required=True)
     type = serializers.ChoiceField(required=True, choices=TYPE)
+
+
+class GetTagSerializer(serializers.Serializer):
+    TYPE = (
+        ("video", "Video"),
+        ("audio", "Audio"),
+        ("picture", "Picture"),
+        ("article", "Article"),
+    )
+    type = serializers.ChoiceField(required=True, choices=TYPE)
