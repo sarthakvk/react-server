@@ -222,6 +222,7 @@ class MediaPreview(APIView):
         """
 
         response_data = {}
+        response_format = {}
         serializer = MediaPreviewSerializer(data=request.GET)
 
         if serializer.is_valid():
@@ -239,11 +240,7 @@ class MediaPreview(APIView):
                 )
             )
 
-            media = (
-                media_query.filter(id=media_id)
-                .only(*response_format[type].keys())
-                .get()
-            )
+            media = media_query.get(id=media_id)
 
             response_data[type] = media
             response_data["comments"] = media.main_thread
@@ -270,26 +267,26 @@ class MediaPreview(APIView):
                 if has_responded:
                     response_data["liked"] = has_responded[0].val
 
-        response_format = {
-            type: {
-                "id": 1,
-                "title": 1,
-                "description": 1,
-                "thumbnail": 1,
-                "content": 1,
-                "body": 1,
-            },
-            "comments": [
-                {
+            response_format = {
+                type: {
                     "id": 1,
-                    "message": 1,
-                    "replies_count": 1,
-                }
-            ],
-            "likes_count": 1,
-            "dislikes_count": 1,
-            "liked": 1,
-            "views_count": 1,
-        }
+                    "title": 1,
+                    "description": 1,
+                    "thumbnail": 1,
+                    "content": 1,
+                    "body": 1,
+                },
+                "comments": [
+                    {
+                        "id": 1,
+                        "message": 1,
+                        "replies_count": 1,
+                    }
+                ],
+                "likes_count": 1,
+                "dislikes_count": 1,
+                "liked": 1,
+                "views_count": 1,
+            }
 
         return return_response(response_data=response_data, format=response_format)
