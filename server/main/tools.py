@@ -19,7 +19,9 @@ def _evaluate(obj, exp):
         elif callable(attr):
             return attr()
         elif isinstance(attr, File):
-            return attr.url  # todo set staticfiles url for deployment
+            return (
+                settings.SERVER_ADDRESS + attr.url
+            )  # todo set staticfiles url for deployment
         elif isinstance(attr, datetime.datetime):
             return str(attr)
         return attr
