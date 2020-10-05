@@ -201,4 +201,4 @@ STATIC_URL = "/static/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
 
-SERVER_ADDRESS = "https://localhost:8000"
+SERVER_ADDRESS = "http://localhost:8000"
