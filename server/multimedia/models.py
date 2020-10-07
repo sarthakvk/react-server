@@ -2,6 +2,7 @@ from django.db import models
 from users.models import User
 from channels.models import Channel
 from django_extensions.db.models import TimeStampedModel
+from django.utils.html import mark_safe
 
 # Create your models here.
 
@@ -16,6 +17,9 @@ class Likes(TimeStampedModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     val = models.BooleanField(null=False, blank=False)
     # ManyToManyRel = Media
+
+    def __str__(self):
+        return self.user.username
 
 
 class Comments(TimeStampedModel):
@@ -34,15 +38,44 @@ class Comments(TimeStampedModel):
     )
     # ManyToManyRel = Media
 
+    def __str__(self):
+        return self.user.username
+
 
 class Tags(TimeStampedModel):
     name = models.CharField(max_length=100, null=False, blank=True, unique=True)
     # ManyToManyRel = Media
 
+    def total_videos(self):
+        return self.video.all().count()
+
+    total_videos.short_description = "Videos"
+
+    def total_audios(self):
+        return self.audio.all().count()
+
+    total_audios.short_description = "Audios"
+
+    def total_pictures(self):
+        return self.picture.all().count()
+
+    total_pictures.short_description = "Pictures"
+
+    def total_articles(self):
+        return self.article.all().count()
+
+    total_articles.short_description = "Articles"
+
+    def __str__(self):
+        return self.name
+
 
 class Views(TimeStampedModel):
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
     ip = models.GenericIPAddressField(null=True, blank=True)
+
+    def __str__(self):
+        return self.user.username
 
 
 class Media(TimeStampedModel):
@@ -63,6 +96,29 @@ class Media(TimeStampedModel):
     views = models.ManyToManyField(Views, related_name="%(class)s", blank=True)
     tags = models.ManyToManyField(Tags, related_name="%(class)s", blank=True)
     content = models.FileField(upload_to="multimedia", null=False, blank=True)
+
+    def total_likes(self):
+        return self.likes.all().count()
+
+    total_likes.short_description = "Likes"
+
+    def total_comments(self):
+        return self.comments.all().count()
+
+    total_comments.short_description = "Comments"
+
+    def total_views(self):
+        return self.views.all().count()
+
+    def thumbnail_tag(self):
+        from django.utils.html import mark_safe
+
+        return mark_safe("<img src=%s height=250/>" % self.thumbnail.url)
+
+    thumbnail_tag.short_description = "Preview"
+
+    def __str__(self):
+        return self.title
 
     class Meta:
         abstract = True
@@ -118,6 +174,29 @@ class SavedMedia(TimeStampedModel):
     audio = models.ManyToManyField(
         Audio, blank=True, related_name="saved_audios", through="SavedAudio"
     )
+
+    def total_videos(self):
+        return self.video.all().count()
+
+    total_videos.short_description = "Videos Saved"
+
+    def total_audios(self):
+        return self.audio.all().count()
+
+    total_audios.short_description = "Audios Saved"
+
+    def total_pictures(self):
+        return self.picture.all().count()
+
+    total_pictures.short_description = "Pictures Saved"
+
+    def total_articles(self):
+        return self.article.all().count()
+
+    total_articles.short_description = "Articles saved"
+
+    def __str__(self):
+        return self.user.username
 
 
 class SavedVideo(TimeStampedModel):

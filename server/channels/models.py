@@ -18,3 +18,11 @@ class Channel(TimeStampedModel):
     subscribers = models.ManyToManyField(
         User, blank=True, related_name="channel_subscribed"
     )
+
+    def total_subs(self):
+        return self.subscribers.all().count()
+
+    total_subs.short_description = "Total Subscribers"
+
+    def __str__(self):
+        return self.name
